@@ -106,104 +106,28 @@ export async function saveSetting(db: IDBPDatabase<ExpenseDB>, key: string, valu
 
 async function seedData(db: IDBPDatabase<ExpenseDB>) {
     console.log("Seeding data...");
-    const today = new Date();
 
-    // 1. Subscriptions
-    const subs: Subscription[] = [
-        { id: crypto.randomUUID(), name: 'Netflix Standard', cost: 499, billingPeriod: 'monthly', nextBillingDate: new Date(today.getFullYear(), today.getMonth(), 5).toISOString(), active: true },
-        { id: crypto.randomUUID(), name: 'Amazon Prime', cost: 1499 / 12, billingPeriod: 'yearly', nextBillingDate: new Date(today.getFullYear(), today.getMonth(), 15).toISOString(), active: true },
-        { id: crypto.randomUUID(), name: 'Spotify Premium', cost: 139, billingPeriod: 'monthly', nextBillingDate: new Date(today.getFullYear(), today.getMonth(), 21).toISOString(), active: true },
-        { id: crypto.randomUUID(), name: 'Disney+ Hotstar', cost: 299, billingPeriod: 'monthly', nextBillingDate: new Date(today.getFullYear(), today.getMonth(), 10).toISOString(), active: true },
-        { id: crypto.randomUUID(), name: 'YouTube Premium', cost: 149, billingPeriod: 'monthly', nextBillingDate: new Date(today.getFullYear(), today.getMonth(), 28).toISOString(), active: true },
-        { id: crypto.randomUUID(), name: 'Gym Membership', cost: 1500, billingPeriod: 'monthly', nextBillingDate: new Date(today.getFullYear(), today.getMonth(), 1).toISOString(), active: true },
-        { id: crypto.randomUUID(), name: 'Google One', cost: 130, billingPeriod: 'monthly', nextBillingDate: new Date(today.getFullYear(), today.getMonth(), 12).toISOString(), active: true },
-    ];
+    // 1. Subscriptions - Initialize empty
+    const subs: Subscription[] = [];
 
     for (const sub of subs) {
         await db.put('subscriptions', sub);
     }
 
-    // 2. Budgets
+    // 2. Budgets - Initialize with 0 limits
     const budgets: Budget[] = [
-        { category: 'Food', limit: 15000 },
-        { category: 'Travel', limit: 14000 },
-        { category: 'Subscriptions', limit: 3500 },
-        { category: 'Other', limit: 8000 },
+        { category: 'Food', limit: 0 },
+        { category: 'Travel', limit: 0 },
+        { category: 'Subscriptions', limit: 0 },
+        { category: 'Other', limit: 0 },
     ];
 
     for (const b of budgets) {
         await db.put('budgets', b);
     }
 
-    // 3. Transactions (Generate for last 3 months)
+    // 3. Transactions - Initialize empty
     const transactions: Transaction[] = [];
-
-    for (let i = 0; i < 90; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString();
-
-        // Income (1st of month: Salary, Random 15th: Freelance)
-        if (date.getDate() === 1) {
-            transactions.push({
-                id: crypto.randomUUID(),
-                type: 'income',
-                category: 'Salary',
-                amount: 38000,
-                date: dateStr,
-                description: 'Monthly Salary'
-            });
-        }
-        if (date.getDate() === 15) {
-            transactions.push({
-                id: crypto.randomUUID(),
-                type: 'income',
-                category: 'Freelance',
-                amount: 8000,
-                date: dateStr,
-                description: 'Freelance Project Payment'
-            });
-        }
-
-        // Daily Expenses
-        // Food
-        if (Math.random() > 0.3) {
-            const isDiningOut = Math.random() > 0.8;
-            transactions.push({
-                id: crypto.randomUUID(),
-                type: 'expense',
-                category: 'Food',
-                amount: isDiningOut ? Math.floor(Math.random() * 500) + 300 : Math.floor(Math.random() * 200) + 50,
-                date: dateStr,
-                description: isDiningOut ? 'Restaurant Dinner' : 'Groceries/Snacks'
-            });
-        }
-
-        // Travel
-        if (Math.random() > 0.4) {
-            const isCab = Math.random() > 0.7;
-            transactions.push({
-                id: crypto.randomUUID(),
-                type: 'expense',
-                category: 'Travel',
-                amount: isCab ? Math.floor(Math.random() * 400) + 150 : Math.floor(Math.random() * 50) + 20,
-                date: dateStr,
-                description: isCab ? 'Uber/Ola Ride' : 'Metro/Bus'
-            });
-        }
-
-        // Occasional 'Other'
-        if (Math.random() > 0.85) {
-            transactions.push({
-                id: crypto.randomUUID(),
-                type: 'expense',
-                category: 'Other',
-                amount: Math.floor(Math.random() * 2000) + 500,
-                date: dateStr,
-                description: 'Shopping/Misc'
-            });
-        }
-    }
 
     for (const tx of transactions) {
         await db.put('transactions', tx);
